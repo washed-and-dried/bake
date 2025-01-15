@@ -16,7 +16,7 @@ char *read_file(char *filename) {
     fseek(fp, 0, SEEK_END);
     len = ftell(fp);
     fseek(fp, 0, SEEK_SET);
-    retBuff = malloc(len + 1);
+    retBuff = malloc(sizeof(char) * (len + 1));
     if (retBuff) {
         fread(retBuff, 1, len, fp);
     }
@@ -31,5 +31,4 @@ int main() {
     printf("%s", file_content);
 
     free(file_content);
-    return 0;
 }

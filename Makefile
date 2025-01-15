@@ -9,4 +9,7 @@ build: ./main.c | builds
 	@ gcc -o builds/output ./main.c $(memvar)
 
 builds:
-	mkdir -p $@
+	@ mkdir -p $@
+
+clean:
+	@ rm -rdf builds

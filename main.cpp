@@ -1,14 +1,22 @@
 #include "util.cpp"
 #include <cstdlib>
 #include <cstring>
+#include <map>
 #include <stdio.h>
 #include <unistd.h>
+
+using std::map;
 
 using namespace std;
 
 void print_help(){
     printf("HELP TEXT");
 }
+
+struct Block {
+    vector<char*> dependencies;
+    vector<char*> command_block;
+};
 
 int main(int argc, const char** argv) {
     if (argc < 2) {
@@ -27,7 +35,9 @@ int main(int argc, const char** argv) {
     char *file_content = read_file(filename);
     printf("%s", file_content);
 
-    // ...parse file here and execute target
+    map<char*, Block> bakefile;
+
+    // parse file and execute command
 
     free(file_content);
 }

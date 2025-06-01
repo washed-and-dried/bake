@@ -1,37 +1,13 @@
+#include "util.cpp"
 #include <cstdlib>
 #include <cstring>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 
 using namespace std;
 
 void print_help(){
     printf("HELP TEXT");
-}
-
-char *read_file(const char *filename) {
-    char *retBuff = 0;
-    FILE *fp;
-    long len;
-
-    fp = fopen(filename, "rb");
-
-    if (fp == NULL) {
-        exit(EXIT_FAILURE);
-    }
-
-    fseek(fp, 0, SEEK_END);
-    len = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-    retBuff = new char(sizeof(char) * (len + 1));
-    if (retBuff) {
-        fread(retBuff, 1, len, fp);
-    }
-
-    fclose(fp);
-    retBuff[len] = '\0';
-    return retBuff;
 }
 
 int main(int argc, const char** argv) {

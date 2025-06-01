@@ -8,8 +8,8 @@ memchk: memvar = -g -O0
 memchk: build | builds
 	@ valgrind --leak-check=yes ./builds/output
 
-build: ./main.cpp | builds
-	@ g++ $(CFLAGS) -o builds/output ./main.cpp $(memvar)
+build: main.cpp util.cpp | builds
+	@ g++ $(CFLAGS) -o builds/output main.cpp $(memvar)
 
 builds:
 	@ mkdir -p $@

@@ -11,11 +11,11 @@ using std::string;
 using std::vector;
 
 struct content {
-    // vector<string> deps; FIXME: thinking it only needs to be one string
-    string deps;
+    vector<string> deps; // FIXME: thinking it only needs to be one string
+    // string deps; // FIXME: NO
     vector<string>
         orderOnlyDeps; // FIXME: what are these bruh? Can't we just have a
-                       // sequence number and then evaluate accordingly
+                       // sequence number and then evaluate accordingly -- NO
     vector<string> recipes;
 };
 
@@ -59,6 +59,16 @@ class Parser {
                 idx = this->skipSpaces(line, idx);
 
                 string deps = line.substr(idx);
+
+                int pipeIdx = deps.find('|');
+                string leftDepsStr = deps.substr(0, pipeIdx);
+                vector<string> leftDeps = split_words(leftDepsStr);
+
+                string righDepsStr =
+                    pipeIdx != -1 ? deps.substr(pipeIdx + 1) : "";
+
+                vector<string> rightDeps = split_words(righDepsStr);
+
                 // printf("%s\n", deps.c_str());
                 // printf("%s\n", line.c_str());
 
@@ -82,7 +92,9 @@ class Parser {
 
                 // FIXME: Arsh baby please fix this addition, I have no idea
                 // what the struct field mean
-                bakefile[target].push_back({.deps = deps, .recipes = commands});
+                bakefile[target].push_back({.deps = leftDeps,
+                                            .orderOnlyDeps = rightDeps,
+                                            .recipes = commands});
             } else if (line[idx] ==
                        '=') { // TODO: handle spaces like `VAR = some_value`
                               // otherwise it would brick
@@ -113,10 +125,32 @@ class Parser {
     }
 
     int skipSpaces(string &line, int start) {
-        while (line[start] == ' ') {
+        while (isspace(line[start])) {
             start++;
         }
 
         return start;
+    }
+
+    vector<string> split_words(string &line) {
+        vector<string> words;
+        int len = line.size();
+        int i = 0;
+
+        while (i < len) {
+            while (i < len && isspace(line[i]))
+                i++;
+
+            int start = i;
+
+            while (i < len && !isspace(line[i]))
+                i++;
+
+            if (start < i) {
+                words.push_back(line.substr(start, i - start));
+            }
+        }
+
+        return words;
     }
 };

@@ -1,5 +1,8 @@
-main: main.c
+main: main.c | builds
     gcc -o main main.c
 
 build: main
     @ ./main
+
+builds:
+	@ mkdir -p $@

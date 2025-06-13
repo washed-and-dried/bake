@@ -43,7 +43,15 @@ int main(int argc, const char **argv) {
     // pretty printing for debugging
     for (const auto &[key, val] : bakefile) {
         printf("target: %s \n", key.c_str());
-        printf("deps: %s\n", val.front().deps.c_str());
+        printf("deps: \n");
+        for (const auto &c : val.front().deps) {
+            printf("%s\n", c.c_str());
+        }
+
+        printf("order-only-deps: \n");
+        for (const auto &c : val.front().orderOnlyDeps) {
+            printf("%s\n", c.c_str());
+        }
 
         printf("commaands:\n");
         for (const auto &c : val.front().recipes) {

@@ -40,5 +40,16 @@ int main(int argc, const char **argv) {
     Parser parser(file, "");
     map<std::string, std::vector<content>> bakefile = parser.parse();
 
+    // pretty printing for debugging
+    for (const auto &[key, val] : bakefile) {
+        printf("target: %s \n", key.c_str());
+        printf("deps: %s\n", val.front().deps.c_str());
+
+        printf("commaands:\n");
+        for (const auto &c : val.front().recipes) {
+            printf("%s\n", c.c_str());
+        }
+    }
+
     // execute
 }

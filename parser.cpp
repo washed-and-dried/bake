@@ -11,11 +11,8 @@ using std::string;
 using std::vector;
 
 struct content {
-    vector<string> deps; // FIXME: thinking it only needs to be one string
-    // string deps; // FIXME: NO
-    vector<string>
-        orderOnlyDeps; // FIXME: what are these bruh? Can't we just have a
-                       // sequence number and then evaluate accordingly -- NO
+    vector<string> deps;
+    vector<string> orderOnlyDeps;
     vector<string> recipes;
 };
 
@@ -60,6 +57,7 @@ class Parser {
 
                 string deps = line.substr(idx);
 
+                // '|' starts an orderonly deps
                 int pipeIdx = deps.find('|');
                 string leftDepsStr = deps.substr(0, pipeIdx);
                 vector<string> leftDeps = split_words(leftDepsStr);

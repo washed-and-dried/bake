@@ -13,11 +13,6 @@ using namespace std;
 
 void print_help() { printf("HELP TEXT"); }
 
-struct Block {
-    vector<char *> dependencies;
-    vector<char *> command_block;
-};
-
 int main(int argc, const char **argv) {
     if (argc < 2) {
         printf("Not enough arguments\n");

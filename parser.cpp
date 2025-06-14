@@ -88,8 +88,6 @@ class Parser {
                     std::getline(in, line);
                 }
 
-                // FIXME: Arsh baby please fix this addition, I have no idea
-                // what the struct field mean
                 bakefile[target].push_back({.deps = leftDeps,
                                             .orderOnlyDeps = rightDeps,
                                             .recipes = commands});

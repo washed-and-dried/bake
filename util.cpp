@@ -2,14 +2,15 @@
 #include <cstdlib>
 #include <cstring>
 #include <stdio.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
 using std::vector;
 
-vector<char *> const parseCommand(const char* const prompt) {
+vector<char *> const parseCommand(const char *const prompt) {
     const size_t n = strlen(prompt);
-    char* dup = new char[n];
+    char *dup = new char[n];
     memcpy(dup, prompt, n);
     vector<char *> da;
     char *tok = strtok(dup, " ");
@@ -26,7 +27,7 @@ vector<char *> const parseCommand(const char* const prompt) {
     return da;
 }
 
-void handleCommand(const char* const prompt) {
+void handleCommand(const char *const prompt) {
     vector<char *> command = parseCommand(prompt);
 
     const int cpid = fork();
@@ -73,4 +74,14 @@ char *read_file(const char *filename) {
     fclose(fp);
     retBuff[len] = '\0';
     return retBuff;
+}
+
+long long get_timestamp(const char *filename) {
+    struct stat sb;
+
+    if (stat(filename, &sb) == -1) {
+        return -1; // no such file exists
+    }
+
+    return sb.st_mtime;
 }

@@ -7,9 +7,12 @@
 #include <vector>
 using std::vector;
 
-vector<char *> const parseCommand(char *const prompt) {
+vector<char *> const parseCommand(const char* const prompt) {
+    const size_t n = strlen(prompt);
+    char* dup = new char[n];
+    memcpy(dup, prompt, n);
     vector<char *> da;
-    char *tok = strtok(prompt, " ");
+    char *tok = strtok(dup, " ");
     if (strcmp(tok, "exit") == 0) {
         exit(0);
     }
@@ -23,7 +26,7 @@ vector<char *> const parseCommand(char *const prompt) {
     return da;
 }
 
-void handleCommand(char *const prompt) {
+void handleCommand(const char* const prompt) {
     vector<char *> command = parseCommand(prompt);
 
     const int cpid = fork();

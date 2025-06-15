@@ -74,6 +74,10 @@ class Parser {
                 std::getline(in, line);
                 // check if line is the command block or start of new thing
                 while (!in.eof()) {
+                    if (line.size() == 0) {
+                        std::getline(in, line);
+                    }
+
                     int isStart = next_word(line, 0);
                     if (line[isStart] == ':') {
                         break;
@@ -101,6 +105,15 @@ class Parser {
         return bakefile;
     }
 
+    int skipSpaces(const string &line, int start) {
+        while (isspace(line[start])) {
+            start++;
+        }
+
+        return start;
+    }
+
+
   private:
     // returns the index at which the current word ends and next starts
     int next_word(string &line, const int start) {
@@ -118,14 +131,6 @@ class Parser {
         }
 
         return idx;
-    }
-
-    int skipSpaces(string &line, int start) {
-        while (isspace(line[start])) {
-            start++;
-        }
-
-        return start;
     }
 
     vector<string> split_words(string &line) {

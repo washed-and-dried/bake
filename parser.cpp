@@ -1,5 +1,5 @@
+#include "util.cpp"
 #include <cctype>
-#include <cstdio>
 #include <iostream>
 #include <istream>
 #include <map>
@@ -53,7 +53,7 @@ class Parser {
 
                 idx++; // skip the colon
 
-                idx = this->skipSpaces(line, idx);
+                idx = skipSpaces(line, idx);
 
                 string deps = line.substr(idx);
 
@@ -105,15 +105,6 @@ class Parser {
         return bakefile;
     }
 
-    int skipSpaces(const string &line, int start) {
-        while (isspace(line[start])) {
-            start++;
-        }
-
-        return start;
-    }
-
-
   private:
     // returns the index at which the current word ends and next starts
     int next_word(string &line, const int start) {
@@ -131,27 +122,5 @@ class Parser {
         }
 
         return idx;
-    }
-
-    vector<string> split_words(string &line) {
-        vector<string> words;
-        int len = line.size();
-        int i = 0;
-
-        while (i < len) {
-            while (i < len && isspace(line[i]))
-                i++;
-
-            int start = i;
-
-            while (i < len && !isspace(line[i]))
-                i++;
-
-            if (start < i) {
-                words.push_back(line.substr(start, i - start));
-            }
-        }
-
-        return words;
     }
 };

@@ -1,12 +1,16 @@
+#pragma once
+
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <stdio.h>
+#include <string>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <vector>
 using std::vector;
+using std::string;
 
 vector<char *> const parseCommand(const char *const prompt) {
     const size_t n = strlen(prompt);
@@ -29,6 +33,7 @@ vector<char *> const parseCommand(const char *const prompt) {
 
 void handleCommand(const char *const prompt) {
     vector<char *> command = parseCommand(prompt);
+    command.push_back(NULL); // execvp requires null terminated list
 
     const int cpid = fork();
 
@@ -41,6 +46,7 @@ void handleCommand(const char *const prompt) {
         execvp(command[0], command.data());
         perror("execvp failed");
 
+        // FIXME: write line no at which error occured.
         exit(1);
     } else { // Parent process
         int wstatus;
@@ -84,4 +90,34 @@ long long get_timestamp(const char *filename) {
     }
 
     return sb.st_mtime;
+}
+
+vector<string> split_words(string &line) {
+    vector<string> words;
+    int len = line.size();
+    int i = 0;
+
+    while (i < len) {
+        while (i < len && isspace(line[i]))
+            i++;
+
+        int start = i;
+
+        while (i < len && !isspace(line[i]))
+            i++;
+
+        if (start < i) {
+            words.push_back(line.substr(start, i - start));
+        }
+    }
+
+    return words;
+}
+
+int skipSpaces(const string &line, int start) {
+    while (isspace(line[start])) {
+        start++;
+    }
+
+    return start;
 }

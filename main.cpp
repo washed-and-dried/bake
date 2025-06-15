@@ -17,7 +17,11 @@ typedef map<std::string, std::vector<content>> BAKEFILE;
 void print_help() { printf("HELP TEXT"); }
 
 bool checkIfDepsModify(const string &target, const vector<content> &content,
-                       BAKEFILE bakefile);
+                       BAKEFILE& bakefile);
+
+void checkOrderOnlyDeps(const string& target, const vector<content>& content, BAKEFILE& bakefile);
+
+void execute_target(const string& target, BAKEFILE& bakefile);
 
 int main(int argc, const char **argv) {
     if (argc < 2) {
@@ -75,20 +79,29 @@ int main(int argc, const char **argv) {
     }
 
     for (const auto &target : targets) {
+        execute_target(target, bakefile);
+    }
+}
+
+void execute_target(const string& target, BAKEFILE& bakefile) {
         // FIXME: if target doesn't exist?
 
         const vector<content> &content = bakefile[target];
 
-        if (checkIfDepsModify(target, content, bakefile)) {
-            continue;
+        if (!checkIfDepsModify(target, content, bakefile)) {
+            return;
         }
 
-        for (const auto &c :
-             content.front()
-                 .recipes) { // FIXME: only getting the first one for now
-            int silent = parser.skipSpaces(c, 0);
+        // FIXME: assuming that orderOnly just checks if the file with the same name as target exists or not
+        checkOrderOnlyDeps(target, content, bakefile);
+
+        for (const auto &command : content.front().recipes) { // FIXME: only getting the first one for now
+            int silent = skipSpaces(command, 0);
+
+            const string c = command.substr(silent);
+            silent = 0; // reset for matching @
             if (c[silent] == '@') { // silent execution
-                silent = parser.skipSpaces(c, silent + 1);
+                silent = skipSpaces(c, silent + 1);
 
                 string command = c.substr(silent);
                 handleCommand(command.c_str());
@@ -98,16 +111,25 @@ int main(int argc, const char **argv) {
             printf("%s\n", c.c_str());
             handleCommand(c.c_str());
         }
-    }
 }
 
 bool checkIfDepsModify(const string &target, const vector<content> &content,
                        BAKEFILE &bakefile) {
-    // FIXME: considering only the first content and no order only deps
+    // FIXME: considering only the first content
+
+    // printf("checking for: %s\n", target.c_str());
     const vector<string> &deps = content.front().deps;
 
     const long long target_ts = get_timestamp(target.c_str());
-    if (target_ts == -1) {
+    if (target_ts != -1) {
+        return false;
+    }
+
+    // if the file with same name as target doesn't exist and it does not have any deps,
+    // then it must be executed. This if statement is required because our logic handles
+    // everythig in a for loop and it will just fall thourgh to the final return false,
+    // if we don't handle empty dep case here
+    if (target_ts == -1 && deps.size() == 0) {
         return true;
     }
 
@@ -121,9 +143,10 @@ bool checkIfDepsModify(const string &target, const vector<content> &content,
                 printf("Specified dep `%s` for target `%s` does not exist\n",
                        dep.c_str(), target.c_str());
             } else {
-                // FIXME: execute dependency if no such file exist
+                // FIXME: is there a fall through with the return true outside?
+                execute_target(dep, bakefile);
             }
-            return true; // FIXME: for now returning true in all cases
+            return true; // FIXME: for now returning true in all cases (address the `else`s FIXME)
         }
 
         if (target_ts < dep_ts)
@@ -131,4 +154,22 @@ bool checkIfDepsModify(const string &target, const vector<content> &content,
     }
 
     return false;
+}
+
+void checkOrderOnlyDeps(const string& target, const vector<content>& content, BAKEFILE& bakefile) {
+    // FIXME: considering only the first content
+    const vector<string> &orderOnly = content.front().orderOnlyDeps;
+
+    for (const auto& dep : orderOnly) {
+        const long long dep_ts = get_timestamp(dep.c_str());
+        if (dep_ts < 0) { // if the file of same name as target doesn't exist we execute the target
+            if (bakefile.find(dep) == bakefile.end()) {
+                printf("Specified order only dep `%s` for target `%s` does not exist\n",
+                       dep.c_str(), target.c_str());
+                return;
+            } else {
+                execute_target(dep, bakefile);
+            }
+        }
+    }
 }

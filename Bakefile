@@ -1,8 +1,8 @@
-build: main.c | builds
-    gcc -o main main.c
-
 main: build
     @ ./main
 
-builds:
-	@ mkdir -p $@
+build: main.c | baker
+    @ gcc -o main main.c
+
+baker:
+	@ mkdir -p baker

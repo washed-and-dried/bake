@@ -2,7 +2,7 @@ CFLAGS= -Wall -Wextra
 
 main: build | builds
 	@ # passing arguments to the program [bake TARGET1 TARGET2]
-	@ ./builds/output bake main
+	@ ./builds/output bake main -B
 
 memchk: memvar = -g -O0
 memchk: build | builds

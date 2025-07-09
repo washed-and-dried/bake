@@ -13,15 +13,16 @@ using namespace std;
 
 #define DEBUG 0
 typedef map<std::string, std::vector<content>> BAKEFILE;
+typedef map<std::string, bool> FLAG;
 
 void print_help() { printf("HELP TEXT"); }
 
 bool checkIfDepsModify(const string &target, const vector<content> &content,
-                       BAKEFILE& bakefile);
+                       BAKEFILE& bakefile, FLAG& flags);
 
-void checkOrderOnlyDeps(const string& target, const vector<content>& content, BAKEFILE& bakefile);
+void checkOrderOnlyDeps(const string& target, const vector<content>& content, BAKEFILE& bakefile, FLAG& flags);
 
-void execute_target(const string& target, BAKEFILE& bakefile);
+void execute_target(const string& target, BAKEFILE& bakefile, FLAG& flags);
 
 int main(int argc, const char **argv) {
     if (argc < 2) {
@@ -67,33 +68,34 @@ int main(int argc, const char **argv) {
 #endif // DEBUG
 
     // execute
+    FLAG flags;
     vector<string> targets;
-    vector<string> flags;
 
     for (int i = 2; i < argc; i++) {
         if (argv[i][0] == '-') {
-            flags.push_back(string(argv[i]));
+            flags[string(argv[i])] =  true;
         } else {
             targets.push_back(string(argv[i]));
         }
     }
 
     for (const auto &target : targets) {
-        execute_target(target, bakefile);
+        execute_target(target, bakefile, flags);
     }
 }
 
-void execute_target(const string& target, BAKEFILE& bakefile) {
+void execute_target(const string& target, BAKEFILE& bakefile, FLAG& flags) {
         // FIXME: if target doesn't exist?
 
         const vector<content> &content = bakefile[target];
 
-        if (!checkIfDepsModify(target, content, bakefile)) {
+        // FIXME: Does this way of checking the flag introduces some anomalities?
+        if (!flags["-B"] && !checkIfDepsModify(target, content, bakefile, flags)) {
             return;
         }
 
         // FIXME: assuming that orderOnly just checks if the file with the same name as target exists or not
-        checkOrderOnlyDeps(target, content, bakefile);
+        checkOrderOnlyDeps(target, content, bakefile, flags);
 
         for (const auto &command : content.front().recipes) { // FIXME: only getting the first one for now
             int silent = skipSpaces(command, 0);
@@ -114,7 +116,7 @@ void execute_target(const string& target, BAKEFILE& bakefile) {
 }
 
 bool checkIfDepsModify(const string &target, const vector<content> &content,
-                       BAKEFILE &bakefile) {
+                       BAKEFILE &bakefile, FLAG& flags) {
     // FIXME: considering only the first content
 
     // printf("checking for: %s\n", target.c_str());
@@ -144,7 +146,7 @@ bool checkIfDepsModify(const string &target, const vector<content> &content,
                        dep.c_str(), target.c_str());
             } else {
                 // FIXME: is there a fall through with the return true outside?
-                execute_target(dep, bakefile);
+                execute_target(dep, bakefile, flags);
             }
             return true; // FIXME: for now returning true in all cases (address the `else`s FIXME)
         }
@@ -156,7 +158,7 @@ bool checkIfDepsModify(const string &target, const vector<content> &content,
     return false;
 }
 
-void checkOrderOnlyDeps(const string& target, const vector<content>& content, BAKEFILE& bakefile) {
+void checkOrderOnlyDeps(const string& target, const vector<content>& content, BAKEFILE& bakefile, FLAG& flags) {
     // FIXME: considering only the first content
     const vector<string> &orderOnly = content.front().orderOnlyDeps;
 
@@ -168,7 +170,7 @@ void checkOrderOnlyDeps(const string& target, const vector<content>& content, BA
                        dep.c_str(), target.c_str());
                 return;
             } else {
-                execute_target(dep, bakefile);
+                execute_target(dep, bakefile, flags);
             }
         }
     }

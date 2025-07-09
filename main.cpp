@@ -97,6 +97,7 @@ void execute_target(const string& target, BAKEFILE& bakefile, FLAG& flags) {
         // FIXME: assuming that orderOnly just checks if the file with the same name as target exists or not
         checkOrderOnlyDeps(target, content, bakefile, flags);
 
+        int lineNo = content.front().startLine + 1;
         for (const auto &command : content.front().recipes) { // FIXME: only getting the first one for now
             int silent = skipSpaces(command, 0);
 
@@ -106,12 +107,13 @@ void execute_target(const string& target, BAKEFILE& bakefile, FLAG& flags) {
                 silent = skipSpaces(c, silent + 1);
 
                 string command = c.substr(silent);
-                handleCommand(command.c_str());
+                handleCommand(command.c_str(), lineNo);
                 continue;
             }
 
             printf("%s\n", c.c_str());
-            handleCommand(c.c_str());
+            handleCommand(c.c_str(), lineNo);
+            lineNo++;
         }
 }
 

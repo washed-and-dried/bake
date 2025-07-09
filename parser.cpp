@@ -14,6 +14,7 @@ struct content {
     vector<string> deps;
     vector<string> orderOnlyDeps;
     vector<string> recipes;
+    size_t startLine;
 };
 
 class Parser {
@@ -27,6 +28,9 @@ class Parser {
     map<string, vector<content>> parse() {
         map<string, vector<content>> bakefile{};
 
+        size_t lineCnt = 1; // We read one line before the while loop
+        int currLine = -1;
+
         string line;
         std::getline(in, line);
         int start = 0;
@@ -34,6 +38,7 @@ class Parser {
             if (line.size() == 0) {
                 if (!in.eof()) {
                     std::getline(in, line);
+                    lineCnt++;
                 }
 
                 continue;
@@ -48,6 +53,8 @@ class Parser {
             // and the next word starts. We would match the this idx to ':' or
             // '=' to determine if its a recipe or an variable definition
             if (line[idx] == ':') {
+                if (currLine == -1) currLine = lineCnt;
+
                 string target = line.substr(start, idx - start);
                 // printf("%s\n", target.c_str());
 
@@ -72,10 +79,12 @@ class Parser {
 
                 vector<string> commands;
                 std::getline(in, line);
+                lineCnt++;
                 // check if line is the command block or start of new thing
                 while (!in.eof()) {
                     if (line.size() == 0) {
                         std::getline(in, line);
+                        lineCnt++;
                     }
 
                     int isStart = next_word(line, 0);
@@ -90,11 +99,12 @@ class Parser {
 
                     commands.push_back(line);
                     std::getline(in, line);
+                    lineCnt++;
                 }
 
                 bakefile[target].push_back({.deps = leftDeps,
                                             .orderOnlyDeps = rightDeps,
-                                            .recipes = commands});
+                                            .recipes = commands, .startLine = (size_t) currLine});
             } else if (line[idx] ==
                        '=') { // TODO: handle spaces like `VAR = some_value`
                               // otherwise it would brick

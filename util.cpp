@@ -31,7 +31,7 @@ vector<char *> const parseCommand(const char *const prompt) {
     return da;
 }
 
-void handleCommand(const char *const prompt) {
+void handleCommand(const char *const prompt, size_t lineNo) {
     vector<char *> command = parseCommand(prompt);
     command.push_back(NULL); // execvp requires null terminated list
 
@@ -44,9 +44,10 @@ void handleCommand(const char *const prompt) {
 
     if (cpid == 0) { // child
         execvp(command[0], command.data());
+
+        printf("Bakefile error at line no %lu\n", lineNo);
         perror("execvp failed");
 
-        // FIXME: write line no at which error occured.
         exit(1);
     } else { // Parent process
         int wstatus;

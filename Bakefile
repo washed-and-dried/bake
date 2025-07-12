@@ -2,7 +2,7 @@ main: build
     @ ./main
 
 build: main.c | baker
-    @ gc -o main main.c
+    @ gcc -o main main.c
 
 baker:
 	@ mkdir -p baker

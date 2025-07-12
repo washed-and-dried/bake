@@ -90,7 +90,7 @@ void execute_target(const string& target, BAKEFILE& bakefile, FLAG& flags) {
         const vector<content> &content = bakefile[target];
 
         // FIXME: Does this way of checking the flag introduces some anomalities?
-        if (!flags["-B"] && !checkIfDepsModify(target, content, bakefile, flags)) {
+        if (!checkIfDepsModify(target, content, bakefile, flags) && !flags["-B"]) {
             return;
         }
 

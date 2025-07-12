@@ -105,6 +105,7 @@ class Parser {
                 bakefile[target].push_back({.deps = leftDeps,
                                             .orderOnlyDeps = rightDeps,
                                             .recipes = commands, .startLine = (size_t) currLine});
+                currLine = -1;
             } else if (line[idx] ==
                        '=') { // TODO: handle spaces like `VAR = some_value`
                               // otherwise it would brick

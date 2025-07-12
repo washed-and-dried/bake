@@ -45,6 +45,7 @@ void handleCommand(const char *const prompt, size_t lineNo) {
     if (cpid == 0) { // child
         execvp(command[0], command.data());
 
+        // FIXME: Pretty the error reporting :pray
         printf("Bakefile error at line no %lu\n", lineNo);
         perror("execvp failed");
 

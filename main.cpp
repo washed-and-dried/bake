@@ -85,7 +85,11 @@ int main(int argc, const char **argv) {
 }
 
 void execute_target(const string& target, BAKEFILE& bakefile, FLAG& flags) {
-        // FIXME: if target doesn't exist?
+        if (bakefile.find(target) == bakefile.end()) {
+            printf("No rule to make target '%s'. Stop.",
+                    target.c_str());
+            exit(1); // FIXME: Makefile just stops execution if target rule doesn't exist, but continues if target has empty recipe
+        }
 
         const vector<content> &content = bakefile[target];
 
@@ -94,7 +98,7 @@ void execute_target(const string& target, BAKEFILE& bakefile, FLAG& flags) {
             return;
         }
 
-        // FIXME: assuming that orderOnly just checks if the file with the same name as target exists or not
+        // FIXME: also, orderonly deps can be normal deps for some other target, i'm assuming that works anyways?
         checkOrderOnlyDeps(target, content, bakefile, flags);
 
         int lineNo = content.front().startLine + 1;
@@ -141,16 +145,9 @@ bool checkIfDepsModify(const string &target, const vector<content> &content,
         const long long dep_ts = get_timestamp(dep.c_str());
 
         if (dep_ts < 0) {
-            if (bakefile.find(dep) == bakefile.end()) {
-                // FIXME: consider what to do if deps does not exist. Maybe read
-                // around what Make does
-                printf("Specified dep `%s` for target `%s` does not exist\n",
-                       dep.c_str(), target.c_str());
-            } else {
-                // FIXME: is there a fall through with the return true outside?
-                execute_target(dep, bakefile, flags);
-            }
-            return true; // FIXME: for now returning true in all cases (address the `else`s FIXME)
+            // FIXME: consider passing target to `execute_target` for better error printing
+            execute_target(dep, bakefile, flags);
+            return true; // FIXME: for now returning true in all cases | arsh: there `was` an else, check commit and remove this fixme
         }
 
         if (target_ts < dep_ts)
